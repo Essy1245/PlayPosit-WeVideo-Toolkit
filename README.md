@@ -2,16 +2,11 @@
 
 A browser extension designed to provide playback control, acceleration, and intelligent question solving for PlayPosit and WeVideo interactive video assignments embedded within Learning Management Systems (Canvas, Blackboard, Brightspace).
 
----
+
 
 ## AI Transparency:
-- This project was AI-driven. Gemini 3.8 Flash, Claude Opus 5.5, and Gemini 3.1 Pro produced all of the code and architecture. I cannot guarantee the stability nor the security of the code. 
+- This project was entirely driven by AI Agents. Gemini 3.8 Flash, Claude Opus 5.5, and Gemini 3.1 Pro produced all of the code and architecture. I cannot guarantee the stability nor the security of the code. 
 
----
-
-## To install: 
-- Go to Releases, download source code, unzip, and load as unpacked extension.
-- Developer Mode must be enabled in `chrome://extension`
 
 ## Installation (Chrome Developer Mode)
 
