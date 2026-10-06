@@ -10,7 +10,7 @@ A browser extension designed to provide playback control, acceleration, and inte
 ---
 
 ## To install: 
-- Go to Releases, use the packaged .crx file (recommended) or download source code, unzip, and load as unpacked extension.
+- Go to Releases, download source code, unzip, and load as unpacked extension.
 - Developer Mode must be enabled in `chrome://extension`
 
 ## Important Disclaimers
