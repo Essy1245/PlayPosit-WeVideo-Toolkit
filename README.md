@@ -13,6 +13,16 @@ A browser extension designed to provide playback control, acceleration, and inte
 - Go to Releases, download source code, unzip, and load as unpacked extension.
 - Developer Mode must be enabled in `chrome://extension`
 
+## Installation (Chrome Developer Mode)
+
+1. Download extension zip from Releases.
+2. Unzip it somewhere hidden. 
+3. In Google Chrome, navigate to `chrome://extensions`.
+4. Enable **Developer mode** using the toggle switch in the upper-right corner.
+5. Click **Load unpacked** in the upper-left corner.
+6. Select the unzipped folder. 
+7. Click the puzzle icon in your Chrome toolbar and pin **WeVideo (Playposit) ToolKit** for convenient access.
+
 ## Important Disclaimers
 
 - **Multiple Attempts Required:** On the initial run, the automated solver utilizes a discovery approach that will submit trial answers to identify correct choices. **Do not use this tool on assignments that permit only a single attempt.** Your LMS assignment must allow multiple attempts to achieve a full score on subsequent runs.
@@ -35,16 +45,11 @@ Operates in a structured two-phase cycle:
 - **Phase 2 (Full-Score Run):** Automatically detects assignment retakes, re-initializes player sessions, applies stored correct answers, and submits with 100% precision.
 - **Automatic Retake Handling:** Detects completion screens, initiates retakes for scores below 100%, confirms prompt dialogs, and monitors subframe reloads without requiring manual intervention.
 
-### 3. Autoplay Prevention & Safety
-- **No Autoplay on Load:** Video playback never starts automatically upon opening assignment tabs or refreshing the browser (F5).
-- **Responsive Pause Controls:** Manually pausing the video with player controls is respected immediately. The extension will not fight the user or force playback to resume.
-- **Subframe vs. Main-Frame Isolation:** Full browser refreshes reset active tasks to idle, while subframe reloads during retakes preserve automated workflows.
-
-### 4. Background Playback & Visibility Spoofing
+### 3. Background Playback & Visibility Spoofing
 - Injects `inject.js` into the main execution context to spoof `document.hidden`, `document.visibilityState`, and `document.hasFocus()`.
 - Neutralizes `blur`, `focusout`, and `visibilitychange` events, preventing PlayPosit from pausing when switching tabs or window focus.
 
-### 5. Audio Notifications & Status Logging
+### 4. Audio Notifications & Status Logging
 - **100% Victory Chime:** Synthesizes an audible confirmation tone upon reaching a complete score and halting playback.
 - **Retake Reset Chime:** Alerts when an attempt is reset for another run.
 - **Interaction Chime:** Alerts when playback pauses at an interaction point, equipped with rate-limiting to prevent repetitive ringing during back-to-back questions.
@@ -52,14 +57,7 @@ Operates in a structured two-phase cycle:
 
 ---
 
-## Installation (Chrome Developer Mode)
 
-1. Download or clone this repository to your local drive.
-2. In Google Chrome, navigate to `chrome://extensions`.
-3. Enable **Developer mode** using the toggle switch in the upper-right corner.
-4. Click **Load unpacked** in the upper-left corner.
-5. Select the `Playposit_yeeter_v3` folder.
-6. Click the puzzle icon in your Chrome toolbar and pin **WeVideo (Playposit) ToolKit** for convenient access.
 
 ---
 
