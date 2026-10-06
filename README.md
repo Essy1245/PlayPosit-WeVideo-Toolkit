@@ -1,12 +1,20 @@
 # WeVideo (Playposit) ToolKit
 
-A Manifest V3 browser extension designed to provide playback control, acceleration, and intelligent question solving for PlayPosit and WeVideo interactive video assignments embedded within Learning Management Systems (Canvas, Blackboard, Brightspace).
+A browser extension designed to provide playback control, acceleration, and intelligent question solving for PlayPosit and WeVideo interactive video assignments embedded within Learning Management Systems (Canvas, Blackboard, Brightspace).
 
 ---
 
+## AI Transparency:
+- This project was AI-driven. Gemini 3.8 Flash, Claude Opus 5.5, and Gemini 3.1 Pro produced all of the code and architecture. I cannot guarantee the stability nor the security of the code. 
+
+---
+
+## To install: 
+- Go to Releases, use the packaged .crx file (recommended) or download source code, unzip, and load as unpacked extension.
+- Developer Mode must be enabled in `chrome://extension`
+
 ## Important Disclaimers
 
-- **Academic Integrity:** This tool is intended for personal productivity, educational research, and quality-of-life accessibility. Always adhere to your institution's academic integrity policies and honor codes.
 - **Multiple Attempts Required:** On the initial run, the automated solver utilizes a discovery approach that will submit trial answers to identify correct choices. **Do not use this tool on assignments that permit only a single attempt.** Your LMS assignment must allow multiple attempts to achieve a full score on subsequent runs.
 - **Folder Preservation:** When loaded as an unpacked extension in Developer Mode, Chrome runs the tool directly from its disk location. Do not move or delete the extension folder after installation.
 
