@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeVideo (Playposit) ToolKit — Guide &amp; Onboarding</title>
+    <link rel="stylesheet" href="onboarding.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo-wrap">
+                <img src="icons/icon48.png" alt="ToolKit Logo" width="44" height="44" style="border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <div>
+                    <h1 class="logo-title">WeVideo (Playposit) ToolKit <span class="badge">v3.8</span></h1>
+                    <p class="logo-subtitle">Automated Playback Accelerator &amp; Intelligent Question Solver</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="#install" class="btn btn-secondary">Installation</a>
+                <a href="#strategy" class="btn btn-primary">How It Works</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- MULTIPLE ATTEMPTS REQUIRED WARNING -->
+        <section class="alert-banner">
+            <div class="alert-content">
+                <h2>Multiple Assignment Attempts Required</h2>
+                <p>
+                    <strong>Do not use this extension if your assignment only allows a single attempt.</strong>
+                    On the first run, the extension uses a guess &amp; try approach that will get questions wrong while discovering correct answers. You need multiple attempts on the assignment to retake it and achieve a full score. (The bulb itself does not need unlimited attempts, but your Canvas assignment must allow multiple attempts).
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 1: HOW IT WORKS (GUESS & TRY) -->
+        <section id="strategy" class="card">
+            <h2 class="section-title"><span class="title-num">1</span> How It Works: Guess &amp; Try</h2>
+            <p class="section-intro">
+                The extension uses a two-step process to solve questions and complete assignments:
+            </p>
+
+            <div class="grid-2">
+                <div class="feature-box phase-discovery">
+                    <div class="phase-badge phase-1">Attempt 1</div>
+                    <h3>Phase 1: Guess &amp; Try Run</h3>
+                    <p>
+                        On the first attempt, the extension does not know the correct answers yet.
+                    </p>
+                    <ul>
+                        <li>It guesses answers and checks feedback to determine which choices are correct.</li>
+                        <li>Getting questions wrong on this attempt is expected.</li>
+                        <li>When correct answers are revealed, the extension saves them to local memory.</li>
+                        <li>It filters out known wrong combinations so it never repeats a mistake.</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box phase-blasting">
+                    <div class="phase-badge phase-2">Attempt 2+</div>
+                    <h3>Phase 2: Full Score Run</h3>
+                    <p>
+                        Once Attempt 1 completes, the extension automatically starts a retake.
+                    </p>
+                    <ul>
+                        <li>The extension recalls the saved correct answers from the first attempt.</li>
+                        <li>It inputs and submits the correct answers immediately.</li>
+                        <li>The assignment completes with a 100% score, halts playback, and plays a completion chime.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: INSTALLATION GUIDE -->
+        <section id="install" class="card">
+            <h2 class="section-title"><span class="title-num">2</span> How to Install (Chrome Developer Mode)</h2>
+            <p class="section-intro">
+                Since this tool is loaded directly into Google Chrome as an unpacked extension:
+            </p>
+
+            <div class="steps-list">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-body">
+                        <h4>Open Chrome Extensions</h4>
+                        <p>In Google Chrome, navigate to <code>chrome://extensions</code> in your address bar.</p>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-body">
+                        <h4>Enable Developer Mode</h4>
+                        <p>Turn ON the <strong>Developer mode</strong> toggle located in the upper-right corner of the page.</p>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-body">
+                        <h4>Load Unpacked Extension</h4>
+                        <p>Click the <strong>Load unpacked</strong> button in the top-left corner, and select the folder containing this extension (<code>Playposit_yeeter_v3</code>).</p>
+                        <div style="margin-top: 8px; padding: 10px 12px; background: #fffbeb; border: 1px solid #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 13px; color: #92400e; line-height: 1.5;">
+                            <strong>Important:</strong> You must keep this folder on your computer. Do not delete or move the folder after installing—Chrome runs developer extensions directly from their disk location. If the folder is deleted or moved, the extension will stop working. (A packaged .crx file will be provided later).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-body">
+                        <h4>Pin to Toolbar</h4>
+                        <p>Click the puzzle piece icon on your Chrome toolbar and pin <strong>WeVideo (Playposit) ToolKit</strong> for 1-click access.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: FASTSTEP MODES & NETWORK LIMITS -->
+        <section class="card">
+            <h2 class="section-title"><span class="title-num">3</span> FastStep Modes &amp; Network Buffering</h2>
+            <p class="section-intro">
+                Why doesn't the extension just jump straight to the end of the video?
+            </p>
+            <div class="info-callout">
+                <strong>Why Full Skipping Can Fail:</strong>
+                PlayPosit streams videos across third-party CDNs (WeVideo, YouTube, Kaltura, Vimeo). Media streams require chunked video buffering. If an extension blindly jumps to the end, the player can freeze, trigger network timeout errors, or crash the PlayPosit heartbeat. FastStep offers three calibrated pacing modes in the Settings panel:
+            </div>
+
+            <div class="grid-3">
+                <div class="mode-card">
+                    <div class="mode-header">
+                        <h4>Legacy</h4>
+                        <span class="mode-tag tag-stable">Most Stable</span>
+                    </div>
+                    <p>Standard 5-second skip intervals every 90ms. Provides maximum stability on slower internet connections or heavy video streams.</p>
+                </div>
+
+                <div class="mode-card">
+                    <div class="mode-header">
+                        <h4>Balanced</h4>
+                        <span class="mode-tag tag-recommended">Recommended</span>
+                    </div>
+                    <p>Accelerated 10-second skip intervals every 45ms with hardware-accelerated timeupdate sync. High speed while protecting buffer state.</p>
+                </div>
+
+                <div class="mode-card">
+                    <div class="mode-header">
+                        <h4>Super</h4>
+                        <span class="mode-tag tag-exp">Experimental</span>
+                    </div>
+                    <p>Forces the video timeline toward the end. PlayPosit's internal listener catches the jump and stops at the upcoming question point.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: AUTO-INITIALIZE & CANVAS URL SAFETY -->
+        <section class="card">
+            <h2 class="section-title"><span class="title-num">4</span> Auto-Initialize &amp; Canvas URL Safety</h2>
+            
+            <div class="info-callout" style="margin-bottom: 16px;">
+                <strong>Auto-Initialize is OFF by Default:</strong>
+                To protect non-assignment pages and other video players, auto-initialization is disabled by default.
+                <br><br>
+                <strong>Toolbar Activation:</strong>
+                When Auto-initialize is OFF, simply click the <strong>WeVideo (Playposit) ToolKit icon</strong> in your Chrome toolbar on any assignment tab. The badge will illuminate to <span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 11px;">ON</span> and immediately inject the control panel into the page and its embedded video player frames.
+            </div>
+
+            <div class="alert-box-warning">
+                <h4>Do Not Whitelist Your Generic Canvas Domain</h4>
+                <p>
+                    Canvas uses HTML5 video players across many pages: instructor lectures, Panopto/Studio recordings, Zoom archive embeds, and announcements.
+                </p>
+                <p>
+                    If you configure a generic domain like <code>canvas.example.edu</code> as an activation URL, the ToolKit will activate on non-PlayPosit video players across Canvas tabs.
+                </p>
+            </div>
+
+            <div class="url-example-box">
+                <h4>Recommended URL Format: Include Specific Course Numbers</h4>
+                <p>Specify the exact Canvas course number where your PlayPosit bulbs are assigned:</p>
+                <div class="code-box">
+                    canvas.example.edu/676767
+                </div>
+                <p class="hint">You can add multiple courses by separating them with commas in the Settings panel.</p>
+            </div>
+
+            <div style="margin-top: 16px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; color: #475569; line-height: 1.5;">
+                <strong>Why Not Restrict URLs in the Chrome Manifest?</strong>
+                Chrome extension manifests declare host permissions statically at install time. Extensions cannot rewrite their own <code>manifest.json</code> dynamically based on custom user inputs without prompting a full extension reload and permission reinstall. Instead, the ToolKit utilizes Chrome's native <code>activeTab</code> API: with Auto-Initialize OFF, the extension runs only when you explicitly click its toolbar icon, giving you full control and avoiding unwanted page interference.
+            </div>
+        </section>
+
+        <!-- SECTION 5: CONTROLS & CHIMES -->
+        <section class="card">
+            <h2 class="section-title"><span class="title-num">5</span> UI Controls, Status History &amp; Chimes</h2>
+            <div class="grid-2">
+                <div>
+                    <h3>Audio Chimes</h3>
+                    <ul class="clean-list">
+                        <li><strong>100% Victory Chime:</strong> Plays when the assignment reaches 100% completion and halts playback.</li>
+                        <li><strong>Retake Chime:</strong> Plays when an attempt is reset for another run.</li>
+                        <li><strong>Interaction Chime:</strong> Alerts when playback pauses for a question, with rate-limiting to prevent repeated ringing during question series.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Status History</h3>
+                    <p>The status bar displays a scrolling history of the last 4 actions with timestamps so you can see what the solver is doing:</p>
+                    <div class="mock-status-bar">
+                        <div class="mock-line muted">[15:52:10] Known question encountered</div>
+                        <div class="mock-line muted">[15:52:10] Trying Known Answer</div>
+                        <div class="mock-line muted">[15:52:11] Submitting</div>
+                        <div class="mock-line active">[15:52:12] Noting Correct Answer</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>WeVideo (Playposit) ToolKit v3.8 &bull; Designed for streamlined educational workflow</p>
+    </footer>
+</body>
+</html>

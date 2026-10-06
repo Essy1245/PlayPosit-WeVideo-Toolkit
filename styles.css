@@ -1,0 +1,578 @@
+/* ─────────────────────────────────────────────
+   WeVideo (Playposit) ToolKit - Unified Control Panel
+   Theme: PlayPosit Native (Blue, Green, Red, White)
+   Corner Radius: 4px
+   ───────────────────────────────────────────── */
+
+#pp-yeeter-panel {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin: 12px 0 20px 0;
+    padding: 14px 16px;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    z-index: 1000;
+}
+
+#pp-yeeter-panel * {
+    box-sizing: border-box;
+}
+
+/* Row 1: Video Controls */
+#pp-yeeter-video-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    height: 32px;
+}
+
+.pp-seek-btn {
+    height: 32px;
+    margin: 0;
+    box-sizing: border-box;
+    padding: 0 12px;
+    background: #f8fafc;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    transition: background 0.15s, border-color 0.15s, transform 0.05s;
+    user-select: none;
+}
+
+.pp-seek-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.pp-seek-btn:active {
+    transform: scale(0.96);
+}
+
+#pp-seekbar-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    height: 32px;
+    margin: 0;
+}
+
+#pp-seekbar {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #e2e8f0;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin: 0;
+}
+
+#pp-seekbar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #0099e5;
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0, 153, 229, 0.4);
+    transition: transform 0.1s;
+}
+
+#pp-seekbar::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+#pp-time-display {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    color: #64748b;
+    min-width: 85px;
+    text-align: center;
+    user-select: none;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    margin: 0;
+}
+
+#pp-speed-select {
+    height: 32px;
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
+    margin: 0;
+    padding: 0 4px;
+    background: #f8fafc;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+    line-height: 30px;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+#pp-speed-select:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+/* Row 2: Action Buttons */
+#pp-yeeter-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+#fast-step-btn, #solve-btn {
+    flex: 1;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    transition: background-color 0.15s, transform 0.05s, box-shadow 0.15s;
+    user-select: none;
+}
+
+#fast-step-btn {
+    background-color: #ef4444; /* PlayPosit Red */
+}
+
+#fast-step-btn:hover {
+    background-color: #dc2626;
+}
+
+#fast-step-btn:active {
+    transform: scale(0.98);
+}
+
+#fast-step-btn.active {
+    background-color: #2bb673; /* PlayPosit Green */
+}
+
+#solve-btn {
+    background-color: #0099e5; /* PlayPosit Blue */
+}
+
+#solve-btn:hover {
+    background-color: #0284c7;
+}
+
+#solve-btn:active {
+    transform: scale(0.98);
+}
+
+#solve-btn.active {
+    background-color: #2bb673; /* PlayPosit Green */
+}
+
+/* Row 3: Status Bar (4-Message Preserved Feed) */
+#pp-status-bar {
+    padding: 8px 12px;
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #0099e5;
+    border-radius: 4px;
+    font-size: 13px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 38px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.pp-status-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.pp-status-item.pp-status-history {
+    font-size: 12px;
+    color: #94a3b8;
+    opacity: 0.75;
+}
+
+.pp-status-item.pp-status-latest {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    opacity: 1;
+}
+
+.pp-status-item.pp-status-latest.info {
+    color: #0284c7;
+}
+
+.pp-status-item.pp-status-latest.ok {
+    color: #16a34a;
+}
+
+.pp-status-item.pp-status-latest.warn {
+    color: #d97706;
+}
+
+.pp-status-item.pp-status-latest.error {
+    color: #dc2626;
+}
+
+.pp-status-time {
+    font-size: 11px;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.pp-status-text {
+    flex: 1;
+}
+
+/* Row 4: Settings */
+#pp-settings-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#pp-settings-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    height: 28px;
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    user-select: none;
+}
+
+#pp-settings-toggle svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    flex-shrink: 0;
+}
+
+#pp-settings-toggle:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #94a3b8;
+}
+
+#pp-settings-panel {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+    padding: 14px 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+#pp-settings-panel.open {
+    display: flex;
+}
+
+.pp-setting-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.pp-setting-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Checkbox Items */
+.pp-settings-checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+@media (max-width: 600px) {
+    .pp-settings-checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pp-setting-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #334155;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+
+.pp-setting-item input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: #0099e5;
+    cursor: pointer;
+}
+
+.pp-setting-item label {
+    cursor: pointer;
+    margin: 0;
+    color: inherit;
+    font-size: inherit;
+}
+
+/* FastStep Mode Slider */
+.pp-slider-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#pp-faststep-mode-slider {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #e2e8f0;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    margin: 6px 0;
+}
+
+#pp-faststep-mode-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #0099e5;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.pp-slider-stops {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    padding: 0 2px;
+}
+
+.pp-stop-label {
+    cursor: pointer;
+}
+
+.pp-stop-label.active {
+    color: #0099e5;
+    font-weight: 700;
+}
+
+.pp-mode-desc {
+    font-size: 12px;
+    color: #64748b;
+    background: #f8fafc;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Auto-initialize text input */
+.pp-text-input {
+    width: 100%;
+    height: 32px;
+    padding: 4px 10px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.pp-text-input:focus {
+    border-color: #0099e5;
+    background: #ffffff;
+}
+
+.pp-setting-warning {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 3px solid #f59e0b;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #92400e;
+    line-height: 1.4;
+}
+
+.pp-setting-warning code {
+    background: #fef3c7;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: #78350f;
+}
+
+/* Settings Actions Row */
+.pp-settings-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+.pp-settings-action-btn {
+    padding: 6px 12px;
+    height: 30px;
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.pp-settings-action-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.pp-guide-btn {
+    background: #0099e5;
+    color: #ffffff;
+    border-color: #0084c7;
+}
+
+.pp-guide-btn:hover {
+    background: #0284c7;
+    border-color: #0270a8;
+}
+
+#pp-clear-answers-btn {
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fecaca;
+}
+
+#pp-clear-answers-btn:hover {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+/* Settings Footer Row (Save & Close) */
+.pp-settings-footer-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 10px;
+    margin-top: 4px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.pp-save-btn {
+    background: #0099e5;
+    color: #ffffff;
+    border-color: #0084c7;
+    font-weight: 700;
+}
+
+.pp-save-btn:hover {
+    background: #0284c7;
+    border-color: #0270a8;
+}
+
+.pp-close-btn {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+.pp-close-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #94a3b8;
+}
+
+/* Fallback: if buttons are standalone in body (legacy mode) */
+body > #fast-step-btn {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    z-index: 99999;
+}
+
+body > #solve-btn {
+    position: fixed;
+    top: 110px;
+    right: 20px;
+    z-index: 99999;
+}

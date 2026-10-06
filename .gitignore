@@ -1,0 +1,19 @@
+# Scratch HTML dumps and parsed frames
+playposit_*.html
+*.mhtml
+retake_search.txt
+
+# Development and reverse-engineering scripts
+parse_mhtml.py
+search.py
+search_html.py
+search_question.py
+
+# Legacy archives and local examples
+Playposit_yeeter_old/
+examples/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
