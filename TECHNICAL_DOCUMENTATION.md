@@ -149,17 +149,17 @@ For unencountered questions where the platform does not reveal answers:
 
 ## 4. Visual Feedback & Answer Learning
 
-When a question attempt fails, PlayPosit/WeVideo renders feedback classes indicating which options were correct, incorrect, or missed. The toolkit parses this DOM state to short-circuit trial sequences:
+When a question attempt completes (either on a retry screen or when attempts are exhausted on the `Continue` / `Next` screen), PlayPosit/WeVideo highlights individual option rows by background color and/or CSS feedback classes. The toolkit parses this DOM state via `analyzeOptionsFeedback()` and `classifyBackgroundColor()` to learn per-option constraints and exact answers:
 
-| Indicator / Selector | DOM Meaning | Solver Action |
+| Visual Highlight / Selector | DOM Meaning | Solver Action |
 | :--- | :--- | :--- |
-| `.missed`, text `"Missed"` | A correct checkbox that was not selected. | Added to the correct answer set. |
-| `.correct`, `.success`, `.is-correct` | A correct option that was selected. | Added to the correct answer set. |
-| Checkmark icon (`check`, `check_circle`) | Correct option confirmation. | Added to the correct answer set. |
-| `.incorrect`, `.error`, text `"Incorrect"` | An erroneous selection. | Disqualified from candidate sets. |
+| **Yellow** (`rgb(254, 247, 224)`) / `.missed`, text `"Missed"` | Should have been selected, but was **not** selected. | Marks attempt as incomplete; adds option to `confirmedOptions` and final `revealedAnswer`. |
+| **Green** (`rgb(230, 244, 234)`) / `.correct`, `.success`, `.is-correct` | Selected as it should have been. | Added to `confirmedOptions` (and `revealedAnswer` if full credit or paired with Yellow). Does **not** imply full credit on its own if Red or Yellow options are also present. |
+| **Red** (`rgb(252, 232, 230)`) / `.incorrect`, `.error`, text `"Incorrect"` | Selected when it should **not** have been. | Marks attempt as incorrect; adds option to `disqualifiedOptions` so all future combinations containing it are pruned. |
 
-### 4.1 False-Positive Elimination
-In single-choice radio questions, Vuetify highlights active radio buttons using the platform theme color. The solver utilizes a negative disqualifier: if an option container contains `.incorrect` or red error styling, it is rejected regardless of active radio selection styles.
+### 4.1 False-Positive Elimination & Partial Credit Handling
+- **Checkbox UI Icons:** Vuetify renders standard checkbox tick icons (`mdi-checkbox-marked`, `check`) inside selected checkboxes regardless of correctness. These UI icons are excluded from feedback detection so an incorrect "Select All" submission is never mistaken for a revealed answer.
+- **Partial Credit vs. Full Points:** Presence of Green options alone does not mean full points were earned. The solver parses `X / Y pts` tags with floating-point support (requiring `earned === total`) and rejects any attempt as non-full-credit if any Red or Yellow option highlight is present.
 
 ---
 
