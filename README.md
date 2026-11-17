@@ -123,3 +123,11 @@ Host Window (Canvas LMS / Top Frame)
 ## License
 
 Distributed under the [MIT License](LICENSE).
+
+## AI short-answer solving
+
+In the extension's Settings, enter a Gemini API key, enable **Use AI for short-answer and fill-in questions**, and click **Save AI Settings**. AI is off by default. The key is stored in Chrome extension storage, not in the page's local storage; leave the field empty to retain it or select **Remove saved key** to delete it.
+
+When AutoSolve finds a question with one empty text or numeric field, it sends the visible question text and supported question images to Google's Gemini 3.5 Flash-Lite API, fills the returned answer, and submits it. Only image elements that can be retrieved without a login are supported; video frames and other embedded media are not included. If the question cannot be read or the answer is rejected, AutoSolve stops for manual review. AI answers can be incorrect. Multiple-choice solving is unchanged.
+
+Requests are serialized and spaced at least 15 seconds apart in this browser session. A quota error stops AutoSolve rather than repeatedly retrying; project-wide and daily limits still apply. Google's free tier may use submitted content to improve its products, and a billed API project may incur charges. Review [Gemini pricing and data use](https://ai.google.dev/gemini-api/docs/pricing) and avoid sending sensitive information unless appropriate for your account and policies.

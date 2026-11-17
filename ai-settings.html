@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { margin: 0; font: 12px Arial, sans-serif; color: #334155; }
+        label { display: block; margin: 7px 0; }
+        input[type=password] { box-sizing: border-box; width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 4px; }
+        button { padding: 5px 10px; cursor: pointer; }
+        p { margin: 7px 0; line-height: 1.35; }
+    </style>
+</head>
+<body>
+    <label for="key"><strong>Gemini API key</strong></label>
+    <input id="key" type="password" autocomplete="off" placeholder="Enter an API key">
+    <label><input id="clear" type="checkbox"> Remove saved key</label>
+    <label><input id="enabled" type="checkbox"> Use AI for short-answer and fill-in questions</label>
+    <p>Gemini 3.5 Flash-Lite sends question text and images to Google. Free-tier limits and data policies apply; answers may be wrong.</p>
+    <button id="save" type="button">Save AI Settings</button> <span id="status" role="status"></span>
+    <script src="ai-settings.js"></script>
+</body>
+</html>

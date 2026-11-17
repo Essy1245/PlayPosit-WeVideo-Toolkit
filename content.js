@@ -291,6 +291,10 @@
                         </label>
                     </div>
 
+                    <div class="pp-setting-section">
+                        <iframe id="pp-ai-settings-frame" title="Gemini AI settings" style="width:100%;height:250px;border:0" src="${chrome.runtime.getURL('ai-settings.html')}"></iframe>
+                    </div>
+
                     <!-- FastStep Mode Slider (3 stops) -->
                     <div class="pp-setting-section">
                         <label class="pp-setting-label">FastStep Mode:</label>
@@ -898,6 +902,7 @@
             '.interactions-wrapper .interaction.active',
             '.interaction.active',
             '.interaction-view.active',
+            '[id^="interaction-"]',
             '.v-dialog--active'
         ];
         for (const sel of selectors) {
@@ -1569,6 +1574,8 @@
     class Guesser {
         constructor() {
             this.active = false;
+            this.runId = 0;
+            this.aiAttempt = false;
             this.interval = null;
             this.combinations = [];
             this.currentComboIndex = 0;
@@ -1626,6 +1633,8 @@
             if (window === window.top && !isPlaypositDomain) return;
 
             this.active = true;
+            this.runId++;
+            this.aiAttempt = false;
             fastStepManuallyStopped = false;
             this._hydrateFromChromeStorage();
 
@@ -1654,6 +1663,7 @@
         stop() {
             if (!this.active) return;
             this.active = false;
+            this.runId++;
 
             if (this.interval) clearInterval(this.interval);
             this.interval = null;
@@ -1761,6 +1771,11 @@
                 // Priority 1: Retry (Only if Retry/Try Again button is visible)
                 const retryBtn = this.findButtonByText(['Retry', 'Try Again'], qContainer);
                 if (retryBtn && this.isVisible(retryBtn)) {
+                    if (this.aiAttempt) {
+                        this.stop();
+                        sendEventUp('status', { msg: 'AI answer was rejected; please review the question manually.', statusType: 'warn' });
+                        return;
+                    }
                     const retriedAt = parseInt(retryBtn.getAttribute('data-yeeter-retried') || '0', 10);
                     if (retriedAt && (Date.now() - retriedAt < 2500)) {
                         return;
@@ -1821,6 +1836,7 @@
                 // Priority 2: Submit
                 const submitBtn = this.findButtonByText(['Submit'], qContainer);
                 if (submitBtn && this.isVisible(submitBtn)) {
+                    if (this.aiAttempt) return; // Wait for grading; never resend the same AI answer.
                     const submittedAt = parseInt(submitBtn.getAttribute('data-yeeter-submitted') || '0', 10);
                     if (submittedAt && (Date.now() - submittedAt < 4000)) {
                         // Already clicked Submit; waiting for PlayPosit to grade and render Retry or Continue/Next
@@ -1836,7 +1852,7 @@
 
                     const inputs = this.getInputs();
                     if (inputs.length === 0) {
-                        this.busy = false;
+                        await this.solveShortAnswer(qContainer, submitBtn);
                         return;
                     }
 
@@ -1932,6 +1948,15 @@
                 // Priority 3: Continue / Next
                 const continueBtn = this.findButtonByText(['Continue', 'Next'], qContainer);
                 if (continueBtn && this.isVisible(continueBtn)) {
+                    if (this.aiAttempt) {
+                        this.aiAttempt = false;
+                        continueBtn.click();
+                        resumeFastStepWhenVideoPlays();
+                        sendEventUp('status', { msg: 'Continuing after AI answer.', statusType: 'info' });
+                        this.busy = true;
+                        setTimeout(() => { this.busy = false; }, 550);
+                        return;
+                    }
                     const continuedAt = parseInt(continueBtn.getAttribute('data-yeeter-continued') || '0', 10);
                     if (continuedAt && (Date.now() - continuedAt < 2500)) {
                         return;
@@ -2392,6 +2417,52 @@
                 disqualifiedOptions,
                 checkedCount
             };
+        }
+
+        async solveShortAnswer(container, submitBtn) {
+            const fields = Array.from(container.querySelectorAll('input:not([type]), input[type="text"], input[type="number"], textarea'))
+                .filter(el => this.isVisible(el) && !el.disabled && !el.readOnly);
+            if (fields.length !== 1) {
+                this.busy = false;
+                this.stop();
+                sendEventUp('status', { msg: 'Unsupported question; please answer manually.', statusType: 'warn' });
+                return;
+            }
+            const field = fields[0];
+            const runId = this.runId;
+            if (field.value.trim()) {
+                this.busy = false;
+                this.stop();
+                sendEventUp('status', { msg: 'Answer field already contains text; please review it manually.', statusType: 'warn' });
+                return;
+            }
+            const question = (container.innerText || '').trim().slice(0, 12000);
+            const images = Array.from(container.querySelectorAll('img')).filter(img => this.isVisible(img))
+                .map(img => img.currentSrc || img.src).filter(Boolean);
+            sendEventUp('status', { msg: 'Asking Gemini to solve the short-answer question…', statusType: 'info' });
+            try {
+                const result = await chrome.runtime.sendMessage({ type: 'gemini-solve', question, images });
+                if (!this.active || this.runId !== runId || !container.isConnected || getActiveQuestionContainer() !== container || !field.isConnected || field.value.trim()) return;
+                if (!result || result.error) throw new Error(result?.error || 'AI request failed.');
+                const prototype = field.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+                Object.getOwnPropertyDescriptor(prototype, 'value').set.call(field, result.answer);
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+                for (let i = 0; submitBtn.disabled && i < 20 && this.active; i++) await new Promise(r => setTimeout(r, 50));
+                if (!this.active || this.runId !== runId || !container.isConnected || getActiveQuestionContainer() !== container) return;
+                if (submitBtn.disabled) throw new Error('Answer was filled but the Submit button remained disabled.');
+                submitBtn.setAttribute('data-yeeter-submitted', Date.now().toString());
+                this.aiAttempt = true;
+                submitBtn.click();
+                sendEventUp('status', { msg: 'AI answer submitted; waiting for feedback.', statusType: 'info' });
+            } catch (err) {
+                if (this.runId === runId) {
+                    this.stop();
+                    sendEventUp('status', { msg: err.message || 'AI request failed.', statusType: 'warn' });
+                }
+            } finally {
+                if (this.runId === runId) this.busy = false;
+            }
         }
 
         // ── Input & Label Helpers ───────────────────────────────────────
