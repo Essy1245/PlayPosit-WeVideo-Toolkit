@@ -146,7 +146,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         console.log(`[ToolKit BG] State query from tab ${tabId}:`, state);
         sendResponse(state);
     }
-    return true; // Keep message channel open for async response
+    return false; // Unrelated messages are handled by their own listener.
 });
 
 // Gemini calls are centralized here so keys never enter page storage or frame messages.
@@ -170,13 +170,29 @@ async function geminiImagePart(source) {
     const response = await fetch(url.href, { credentials: 'omit', signal: AbortSignal.timeout(10000) });
     if (!response.ok) throw new Error(`Question image could not be loaded (HTTP ${response.status}).`);
     const blob = await response.blob();
-    if (!/^image\/(png|jpeg|webp|gif)$/.test(blob.type) || blob.size > 3000000) {
-        throw new Error('Question image is unsupported or too large.');
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(blob.type) || blob.size > 15000000) {
+        throw new Error('Question image format is unsupported or exceeds 15 MB.');
     }
-    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let imageBlob = blob;
+    if (blob.size > 3000000) {
+        try {
+            const bitmap = await createImageBitmap(blob);
+            try {
+                const scale = Math.min(1, 2200 / Math.max(bitmap.width, bitmap.height));
+                const canvas = new OffscreenCanvas(Math.max(1, Math.round(bitmap.width * scale)), Math.max(1, Math.round(bitmap.height * scale)));
+                const ctx = canvas.getContext('2d', { alpha: false });
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                imageBlob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.8 });
+            } finally { bitmap.close(); }
+        } catch (_) { throw new Error('Could not resize the question image.'); }
+        if (imageBlob.size > 3000000) throw new Error('Question image is too large after resizing.');
+    }
+    const bytes = new Uint8Array(await imageBlob.arrayBuffer());
     let binary = '';
     for (let i = 0; i < bytes.length; i += 8192) binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
-    return { inline_data: { mime_type: blob.type, data: btoa(binary) } };
+    return { inline_data: { mime_type: imageBlob.type, data: btoa(binary) } };
 }
 
 async function solveWithGemini(msg) {
@@ -238,7 +254,7 @@ async function solveWithGemini(msg) {
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === 'gemini-solve' && sender.tab && sender.url && /^https:\/\/(?:[^/]+\.)?(?:wevideo\.com|playposit\.com|playpos\.it)\//i.test(sender.url)) {
-        solveWithGemini(msg).then(sendResponse);
+        solveWithGemini(msg).then(sendResponse, () => sendResponse({ error: 'The Gemini request failed unexpectedly.' }));
         return true;
     }
 });

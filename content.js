@@ -2436,12 +2436,19 @@
                 sendEventUp('status', { msg: 'Answer field already contains text; please review it manually.', statusType: 'warn' });
                 return;
             }
-            const question = (container.innerText || '').trim().slice(0, 12000);
-            const images = (await Promise.all(Array.from(container.querySelectorAll('img')).filter(img => this.isVisible(img))
-                .map(img => this.imageToDataUrl(img)))).filter(Boolean);
-            sendEventUp('status', { msg: 'Asking Gemini to solve the short-answer question…', statusType: 'info' });
             try {
-                const result = await chrome.runtime.sendMessage({ type: 'gemini-solve', question, images });
+                const question = (container.innerText || '').trim().slice(0, 12000);
+                sendEventUp('status', { msg: 'Preparing question images…', statusType: 'info' });
+                const images = await Promise.all(Array.from(container.querySelectorAll('img')).filter(img => this.isVisible(img))
+                    .map(img => this.imageToDataUrl(img)));
+                if (!this.active || this.runId !== runId || !container.isConnected || getActiveQuestionContainer() !== container || !field.isConnected || field.value.trim()) return;
+                if (images.some(image => !image)) throw new Error('Could not read a question image. Please answer manually.');
+                sendEventUp('status', { msg: 'Asking Gemini to solve the short-answer question…', statusType: 'info' });
+                let timeout;
+                const result = await Promise.race([
+                    chrome.runtime.sendMessage({ type: 'gemini-solve', question, images }),
+                    new Promise((_, reject) => { timeout = setTimeout(() => reject(new Error('Gemini did not respond within 120 seconds.')), 120000); })
+                ]).finally(() => clearTimeout(timeout));
                 if (!this.active || this.runId !== runId || !container.isConnected || getActiveQuestionContainer() !== container || !field.isConnected || field.value.trim()) return;
                 if (!result || result.error) throw new Error(result?.error || 'AI request failed.');
                 const prototype = field.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
@@ -2474,7 +2481,10 @@
                 const canvas = document.createElement('canvas');
                 canvas.width = Math.max(1, Math.round(bitmap.width * scale));
                 canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-                canvas.getContext('2d', { alpha: false }).drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                const ctx = canvas.getContext('2d', { alpha: false });
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
                 bitmap.close();
                 for (const quality of [0.82, 0.68, 0.52, 0.38]) {
                     const data = canvas.toDataURL('image/jpeg', quality);
@@ -2488,7 +2498,10 @@
                     const scale = Math.min(1, maxDimension / Math.max(img.naturalWidth, img.naturalHeight));
                     canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
                     canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
-                    canvas.getContext('2d', { alpha: false }).drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const ctx = canvas.getContext('2d', { alpha: false });
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     for (const quality of [0.82, 0.68, 0.52, 0.38]) {
                         const data = canvas.toDataURL('image/jpeg', quality);
                         if (data.length <= maxDataUrlLength) return data;
@@ -2498,7 +2511,9 @@
             try {
                 const source = img.currentSrc || img.src;
                 if (!source || source.startsWith('data:')) return null;
-                const response = await fetch(source, { credentials: 'include' });
+                if (/^https:\/\//i.test(source)) return source; // Background fetch can read cross-origin images with host permissions.
+                if (!source.startsWith('blob:')) return null;
+                const response = await fetch(source, { signal: AbortSignal.timeout(10000) });
                 if (!response.ok) return null;
                 return await drawBlob(await response.blob());
             } catch (_) {

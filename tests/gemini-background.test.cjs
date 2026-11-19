@@ -103,3 +103,19 @@ test('distinguishes a Gemini connection failure from an image failure', async ()
     const result = await send({ type: 'gemini-solve', question: 'Question', images: [] });
     assert.match(result.error, /connect to Gemini/i);
 });
+
+test('downloads a cross-origin question image in the background and includes its bytes', async () => {
+    const { context, send } = setup();
+    let requestBody;
+    context.fetch = async (url, options) => {
+        if (url.startsWith('https://cdn.playposit.com/')) {
+            assert.equal(options.credentials, 'omit');
+            return { ok: true, blob: async () => new Blob(['image-bytes'], { type: 'image/png' }) };
+        }
+        requestBody = JSON.parse(options.body);
+        return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: '{"answer":"4"}' }] } }] }) };
+    };
+    const result = await send({ type: 'gemini-solve', question: 'Question', images: ['https://cdn.playposit.com/table.png'] });
+    assert.equal(result.answer, '4');
+    assert.equal(requestBody.contents[0].parts[1].inline_data.data, Buffer.from('image-bytes').toString('base64'));
+});
