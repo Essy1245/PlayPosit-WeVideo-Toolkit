@@ -159,6 +159,15 @@ function getGeminiModel(value) {
     return /^[A-Za-z0-9._-]{1,120}$/.test(model) ? model : GEMINI_MODEL;
 }
 
+function detectImageMime(bytes) {
+    const starts = signature => signature.every((byte, i) => bytes[i] === byte);
+    if (starts([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return 'image/png';
+    if (starts([0xff, 0xd8, 0xff])) return 'image/jpeg';
+    if (starts([0x47, 0x49, 0x46, 0x38]) && (bytes[4] === 0x37 || bytes[4] === 0x39) && bytes[5] === 0x61) return 'image/gif';
+    if (starts([0x52, 0x49, 0x46, 0x46]) && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return 'image/webp';
+    return null;
+}
+
 async function geminiImagePart(source) {
     if (source.startsWith('data:image/')) {
         const match = /^data:(image\/(?:png|jpeg|webp|gif));base64,([a-z0-9+/=]+)$/i.exec(source);
@@ -170,13 +179,14 @@ async function geminiImagePart(source) {
     const response = await fetch(url.href, { credentials: 'omit', signal: AbortSignal.timeout(10000) });
     if (!response.ok) throw new Error(`Question image could not be loaded (HTTP ${response.status}).`);
     const blob = await response.blob();
-    if (!/^image\/(png|jpeg|webp|gif)$/.test(blob.type) || blob.size > 15000000) {
-        throw new Error('Question image format is unsupported or exceeds 15 MB.');
-    }
-    let imageBlob = blob;
+    if (blob.size > 15000000) throw new Error('Question image exceeds 15 MB.');
+    const originalBytes = new Uint8Array(await blob.arrayBuffer());
+    const mime = detectImageMime(originalBytes);
+    if (!mime) throw new Error('Question image is not a supported PNG, JPEG, GIF, or WebP file.');
+    let imageBlob = new Blob([originalBytes], { type: mime });
     if (blob.size > 3000000) {
         try {
-            const bitmap = await createImageBitmap(blob);
+            const bitmap = await createImageBitmap(imageBlob);
             try {
                 const scale = Math.min(1, 2200 / Math.max(bitmap.width, bitmap.height));
                 const canvas = new OffscreenCanvas(Math.max(1, Math.round(bitmap.width * scale)), Math.max(1, Math.round(bitmap.height * scale)));

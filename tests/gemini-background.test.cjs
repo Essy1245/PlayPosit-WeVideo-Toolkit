@@ -19,7 +19,7 @@ function setup() {
     const context = {
         chrome: { action: { onClicked: events() }, tabs: { onUpdated: events(), onRemoved: events() }, webNavigation: { onCommitted: events(), onCompleted: events() }, runtime: { onInstalled: events(), onMessage: { addListener(fn) { listeners.push(fn); } } }, storage: { local: area('local'), session: area('session') } },
         fetch: async (url, options) => { calls.push({ url, options }); return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: '{"answer":"2650"}' }] } }] }) }; },
-        console, URL, AbortSignal, Uint8Array, btoa, Date
+        console, URL, AbortSignal, Uint8Array, Blob, btoa, Date
     };
     vm.createContext(context);
     vm.runInContext(fs.readFileSync('background.js', 'utf8'), context);
@@ -110,12 +110,23 @@ test('downloads a cross-origin question image in the background and includes its
     context.fetch = async (url, options) => {
         if (url.startsWith('https://cdn.playposit.com/')) {
             assert.equal(options.credentials, 'omit');
-            return { ok: true, blob: async () => new Blob(['image-bytes'], { type: 'image/png' }) };
+            return { ok: true, blob: async () => new Blob([Buffer.from('89504e470d0a1a0a0102', 'hex')], { type: 'application/octet-stream' }) };
         }
         requestBody = JSON.parse(options.body);
         return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: '{"answer":"4"}' }] } }] }) };
     };
     const result = await send({ type: 'gemini-solve', question: 'Question', images: ['https://cdn.playposit.com/table.png'] });
     assert.equal(result.answer, '4');
-    assert.equal(requestBody.contents[0].parts[1].inline_data.data, Buffer.from('image-bytes').toString('base64'));
+    assert.equal(requestBody.contents[0].parts[1].inline_data.mime_type, 'image/png');
+    assert.equal(requestBody.contents[0].parts[1].inline_data.data, Buffer.from('89504e470d0a1a0a0102', 'hex').toString('base64'));
+    assert.match(requestBody.contents[0].parts[0].text, /Question/);
+});
+
+test('rejects a non-image response before sending question text to Gemini', async () => {
+    const { context, send } = setup();
+    let count = 0;
+    context.fetch = async () => { count++; return { ok: true, blob: async () => new Blob(['<html>error</html>'], { type: 'application/octet-stream' }) }; };
+    const result = await send({ type: 'gemini-solve', question: 'Question', images: ['https://cdn.playposit.com/table.png'] });
+    assert.match(result.error, /not a supported/i);
+    assert.equal(count, 1);
 });
