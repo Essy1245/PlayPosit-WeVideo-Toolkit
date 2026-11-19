@@ -150,12 +150,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 // Gemini calls are centralized here so keys never enter page storage or frame messages.
-const GEMINI_MODEL = 'gemini-flash-latest';
+const GEMINI_MODEL = 'gemini-4-hydrogen';
 const GEMINI_INTERVAL_MS = 15000;
 let geminiBusy = false;
 
 function getGeminiModel(value) {
     const model = typeof value === 'string' && value.trim() ? value.trim() : GEMINI_MODEL;
+    if (/^gemini-(?:[012]\.|3\.[0-5](?:\D|$))/.test(model)) return GEMINI_MODEL;
     return /^[A-Za-z0-9._-]{1,120}$/.test(model) ? model : GEMINI_MODEL;
 }
 

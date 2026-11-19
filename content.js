@@ -292,7 +292,22 @@
                     </div>
 
                     <div class="pp-setting-section">
-                        <iframe id="pp-ai-settings-frame" title="Gemini AI settings" style="width:100%;height:250px;border:0" src="${chrome.runtime.getURL('ai-settings.html')}"></iframe>
+                        <label class="pp-setting-item"><input type="checkbox" id="pp-ai-enabled"> Use AI for short-answer and fill-in questions</label>
+                        <label class="pp-setting-label" for="pp-ai-key">Gemini API key</label>
+                        <input type="text" id="pp-ai-key" class="pp-text-input" autocomplete="off" spellcheck="false" placeholder="Enter your Gemini API key">
+                        <label class="pp-setting-label" for="pp-ai-model">Gemini model</label>
+                        <select id="pp-ai-model" class="pp-text-input">
+                            <option value="gemini-4-hydrogen">Gemini 4 Hydrogen — free tier</option>
+                            <option value="gemini-4-argon">Gemini 4 Argon — paid</option>
+                            <option value="gemini-4-carbon">Gemini 4 Carbon — paid</option>
+                            <option value="gemini-4-neon">Gemini 4 Neon — paid</option>
+                            <option value="gemini-3.8-flash">Gemini 3.8 Flash — free tier</option>
+                            <option value="gemini-flash-latest">Flash latest — availability may change</option>
+                            <option value="gemini-pro-latest">Pro latest — availability and cost vary</option>
+                            <option value="custom">Custom model ID…</option>
+                        </select>
+                        <input type="text" id="pp-ai-custom-model" class="pp-text-input" placeholder="Enter a model ID" hidden>
+                        <div class="pp-setting-hint">Question text and images are sent to Google. Model availability and limits depend on your API project.</div>
                     </div>
 
                     <!-- FastStep Mode Slider (3 stops) -->
@@ -413,6 +428,26 @@
         const cbChimeP   = document.getElementById('pp-setting-chime-pause');
         const cbChimeC   = document.getElementById('pp-setting-chime-complete');
         const cbChimeR   = document.getElementById('pp-setting-chime-retake');
+        const aiEnabled = document.getElementById('pp-ai-enabled');
+        const aiKey = document.getElementById('pp-ai-key');
+        const aiModel = document.getElementById('pp-ai-model');
+        const aiCustomModel = document.getElementById('pp-ai-custom-model');
+        let aiSettingsReady = false;
+        for (const el of [aiEnabled, aiKey, aiModel, aiCustomModel]) el.disabled = true;
+
+        const updateCustomModel = () => { aiCustomModel.hidden = aiModel.value !== 'custom'; };
+        aiModel.addEventListener('change', updateCustomModel);
+        chrome.storage.local.get(['geminiApiKey', 'aiShortAnswerEnabled', 'geminiModel']).then(settings => {
+            aiKey.value = settings.geminiApiKey || '';
+            aiEnabled.checked = settings.aiShortAnswerEnabled === true;
+            const stored = settings.geminiModel || 'gemini-4-hydrogen';
+            const selected = /^gemini-(?:[012]\.|3\.[0-5](?:\D|$))/.test(stored) ? 'gemini-4-hydrogen' : stored;
+            if (Array.from(aiModel.options).some(option => option.value === selected && selected !== 'custom')) aiModel.value = selected;
+            else { aiModel.value = 'custom'; aiCustomModel.value = selected; }
+            updateCustomModel();
+            aiSettingsReady = true;
+            for (const el of [aiEnabled, aiKey, aiModel, aiCustomModel]) el.disabled = false;
+        }).catch(() => setHostStatus('Could not load AI settings.', 'warn'));
 
         if (cbAutoInit)  cbAutoInit.checked = getSetting('autoInitEnabled', false);
         cbBg.checked     = getSetting('bgPlay', false);
@@ -554,7 +589,11 @@
         // Save Settings button
         const btnSave = document.getElementById('pp-save-settings-btn');
         if (btnSave) {
-            btnSave.addEventListener('click', () => {
+            btnSave.addEventListener('click', async () => {
+                if (!aiSettingsReady) {
+                    setHostStatus('AI settings have not loaded. Refresh and try again.', 'warn');
+                    return;
+                }
                 const autoInit = cbAutoInit ? cbAutoInit.checked : false;
                 const bgPlay = cbBg ? cbBg.checked : false;
                 const unl = cbUnl ? cbUnl.checked : true;
@@ -563,6 +602,17 @@
                 const chimeR = cbChimeR ? cbChimeR.checked : false;
                 const mode = parseInt(modeSlider.value, 10) || 2;
                 const urls = autoInitInput ? autoInitInput.value.trim() : '';
+                const selectedModel = aiModel.value === 'custom' ? aiCustomModel.value.trim() : aiModel.value;
+                if (!/^[A-Za-z0-9._-]{1,120}$/.test(selectedModel)) {
+                    setHostStatus('Enter a valid Gemini model ID.', 'warn');
+                    return;
+                }
+                try {
+                    await chrome.storage.local.set({ geminiApiKey: aiKey.value.trim(), aiShortAnswerEnabled: aiEnabled.checked, geminiModel: selectedModel });
+                } catch (_) {
+                    setHostStatus('Could not save AI settings.', 'warn');
+                    return;
+                }
 
                 saveSetting('autoInitEnabled', autoInit);
                 saveSetting('bgPlay', bgPlay);

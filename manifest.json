@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "WeVideo (Playposit) ToolKit",
-    "version": "3.8",
+    "version": "3.9.0",
     "description": "Unified playback accelerator and intelligent interaction toolkit for WeVideo and PlayPosit players.",
     "icons": {
         "16": "icons/icon16.png",
@@ -33,9 +33,7 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "inject.js",
-                "ai-settings.html",
-                "ai-settings.js"
+                "inject.js"
             ],
             "matches": [
                 "<all_urls>"

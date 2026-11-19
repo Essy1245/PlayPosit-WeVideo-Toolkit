@@ -35,7 +35,7 @@ test('sends question and image once, never puts key in URL, and enforces cooldow
     const result = await send(msg);
     assert.equal(result.answer, '2650');
     assert.equal(calls.length, 1);
-    assert.match(calls[0].url, /gemini-flash-latest:generateContent$/);
+    assert.match(calls[0].url, /gemini-4-hydrogen:generateContent$/);
     assert.doesNotMatch(calls[0].url, /test-key/);
     assert.equal(calls[0].options.headers['x-goog-api-key'], 'test-key');
     assert.equal(JSON.parse(calls[0].options.body).contents[0].parts[1].inline_data.data, 'YWJj');
@@ -77,7 +77,7 @@ test('uses a valid custom model and explains model access failures', async () =>
     assert.match(result.error, /denied access.*gemini-3\.8-flash/i);
 });
 
-test('falls back to the latest Flash alias for an invalid stored model', async () => {
+test('falls back to Hydrogen for an invalid stored model', async () => {
     const { context, send, calls, storage } = setup();
     storage.local.geminiModel = 'bad model name';
     context.fetch = async (url) => {
@@ -85,7 +85,17 @@ test('falls back to the latest Flash alias for an invalid stored model', async (
         return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: '{"answer":"4"}' }] } }] }) };
     };
     await send({ type: 'gemini-solve', question: 'Question', images: [] });
-    assert.match(calls[0].url, /gemini-flash-latest:generateContent$/);
+    assert.match(calls[0].url, /gemini-4-hydrogen:generateContent$/);
+});
+
+test('migrates retired model choices while preserving newer explicit models', async () => {
+    const { context } = setup();
+    for (const old of ['gemini-3.5-flash-lite', 'gemini-3.1-pro-preview', 'gemini-2.5-flash']) {
+        assert.equal(context.getGeminiModel(old), 'gemini-4-hydrogen');
+    }
+    for (const current of ['gemini-4-hydrogen', 'gemini-4-argon', 'gemini-3.8-flash', 'gemini-flash-latest']) {
+        assert.equal(context.getGeminiModel(current), current);
+    }
 });
 
 test('reports image download failure without sending an incomplete question to Gemini', async () => {
