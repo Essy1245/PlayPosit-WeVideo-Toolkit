@@ -35,7 +35,7 @@ test('sends question and image once, never puts key in URL, and enforces cooldow
     const result = await send(msg);
     assert.equal(result.answer, '2650');
     assert.equal(calls.length, 1);
-    assert.match(calls[0].url, /gemini-3\.5-flash-lite:generateContent$/);
+    assert.match(calls[0].url, /gemini-flash-latest:generateContent$/);
     assert.doesNotMatch(calls[0].url, /test-key/);
     assert.equal(calls[0].options.headers['x-goog-api-key'], 'test-key');
     assert.equal(JSON.parse(calls[0].options.body).contents[0].parts[1].inline_data.data, 'YWJj');
@@ -63,6 +63,29 @@ test('a 429 stops with a quota message and no automatic retry', async () => {
     const result = await send({ type: 'gemini-solve', question: 'Question', images: [] });
     assert.match(result.error, /quota|rate limit/i);
     assert.equal(count, 1);
+});
+
+test('uses a valid custom model and explains model access failures', async () => {
+    const { context, send, calls, storage } = setup();
+    storage.local.geminiModel = 'gemini-3.8-flash';
+    context.fetch = async (url) => {
+        calls.push({ url });
+        return { ok: false, status: 403, json: async () => ({ error: { message: 'permission denied' } }) };
+    };
+    const result = await send({ type: 'gemini-solve', question: 'Question', images: [] });
+    assert.match(calls[0].url, /gemini-3\.8-flash:generateContent$/);
+    assert.match(result.error, /denied access.*gemini-3\.8-flash/i);
+});
+
+test('falls back to the latest Flash alias for an invalid stored model', async () => {
+    const { context, send, calls, storage } = setup();
+    storage.local.geminiModel = 'bad model name';
+    context.fetch = async (url) => {
+        calls.push({ url });
+        return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: '{"answer":"4"}' }] } }] }) };
+    };
+    await send({ type: 'gemini-solve', question: 'Question', images: [] });
+    assert.match(calls[0].url, /gemini-flash-latest:generateContent$/);
 });
 
 test('reports image download failure without sending an incomplete question to Gemini', async () => {

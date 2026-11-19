@@ -34,7 +34,8 @@
         {
             "resources": [
                 "inject.js",
-                "ai-settings.html"
+                "ai-settings.html",
+                "ai-settings.js"
             ],
             "matches": [
                 "<all_urls>"

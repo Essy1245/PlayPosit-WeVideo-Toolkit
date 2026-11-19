@@ -2437,22 +2437,8 @@
                 return;
             }
             const question = (container.innerText || '').trim().slice(0, 12000);
-            const images = Array.from(container.querySelectorAll('img')).filter(img => this.isVisible(img))
-                .map(img => {
-                    // Prefer the already-loaded pixels when the browser permits reading them.
-                    // This handles blob URLs and images that need the user's session.
-                    try {
-                        if (img.naturalWidth && img.naturalHeight && img.naturalWidth * img.naturalHeight <= 16000000) {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = img.naturalWidth;
-                            canvas.height = img.naturalHeight;
-                            canvas.getContext('2d').drawImage(img, 0, 0);
-                            const data = canvas.toDataURL('image/png');
-                            if (data.length <= 4000000) return data;
-                        }
-                    } catch (_) { /* Cross-origin images fall back to background fetch. */ }
-                    return img.currentSrc || img.src;
-                }).filter(Boolean);
+            const images = (await Promise.all(Array.from(container.querySelectorAll('img')).filter(img => this.isVisible(img))
+                .map(img => this.imageToDataUrl(img)))).filter(Boolean);
             sendEventUp('status', { msg: 'Asking Gemini to solve the short-answer question…', statusType: 'info' });
             try {
                 const result = await chrome.runtime.sendMessage({ type: 'gemini-solve', question, images });
@@ -2476,6 +2462,47 @@
                 }
             } finally {
                 if (this.runId === runId) this.busy = false;
+            }
+        }
+
+        async imageToDataUrl(img) {
+            const maxDataUrlLength = 2800000;
+            const maxDimension = 2200;
+            const drawBlob = async (blob) => {
+                const bitmap = await createImageBitmap(blob);
+                const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+                canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+                canvas.getContext('2d', { alpha: false }).drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                bitmap.close();
+                for (const quality of [0.82, 0.68, 0.52, 0.38]) {
+                    const data = canvas.toDataURL('image/jpeg', quality);
+                    if (data.length <= maxDataUrlLength) return data;
+                }
+                return null;
+            };
+            try {
+                if (img.naturalWidth && img.naturalHeight) {
+                    const canvas = document.createElement('canvas');
+                    const scale = Math.min(1, maxDimension / Math.max(img.naturalWidth, img.naturalHeight));
+                    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+                    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+                    canvas.getContext('2d', { alpha: false }).drawImage(img, 0, 0, canvas.width, canvas.height);
+                    for (const quality of [0.82, 0.68, 0.52, 0.38]) {
+                        const data = canvas.toDataURL('image/jpeg', quality);
+                        if (data.length <= maxDataUrlLength) return data;
+                    }
+                }
+            } catch (_) {}
+            try {
+                const source = img.currentSrc || img.src;
+                if (!source || source.startsWith('data:')) return null;
+                const response = await fetch(source, { credentials: 'include' });
+                if (!response.ok) return null;
+                return await drawBlob(await response.blob());
+            } catch (_) {
+                return null;
             }
         }
 
