@@ -2438,7 +2438,21 @@
             }
             const question = (container.innerText || '').trim().slice(0, 12000);
             const images = Array.from(container.querySelectorAll('img')).filter(img => this.isVisible(img))
-                .map(img => img.currentSrc || img.src).filter(Boolean);
+                .map(img => {
+                    // Prefer the already-loaded pixels when the browser permits reading them.
+                    // This handles blob URLs and images that need the user's session.
+                    try {
+                        if (img.naturalWidth && img.naturalHeight && img.naturalWidth * img.naturalHeight <= 16000000) {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.naturalWidth;
+                            canvas.height = img.naturalHeight;
+                            canvas.getContext('2d').drawImage(img, 0, 0);
+                            const data = canvas.toDataURL('image/png');
+                            if (data.length <= 4000000) return data;
+                        }
+                    } catch (_) { /* Cross-origin images fall back to background fetch. */ }
+                    return img.currentSrc || img.src;
+                }).filter(Boolean);
             sendEventUp('status', { msg: 'Asking Gemini to solve the short-answer question…', statusType: 'info' });
             try {
                 const result = await chrome.runtime.sendMessage({ type: 'gemini-solve', question, images });

@@ -64,3 +64,19 @@ test('a 429 stops with a quota message and no automatic retry', async () => {
     assert.match(result.error, /quota|rate limit/i);
     assert.equal(count, 1);
 });
+
+test('reports image download failure without sending an incomplete question to Gemini', async () => {
+    const { context, send } = setup();
+    let calls = 0;
+    context.fetch = async () => { calls++; return { ok: false, status: 403 }; };
+    const result = await send({ type: 'gemini-solve', question: 'Question', images: ['https://example.com/table.png'] });
+    assert.match(result.error, /image.*HTTP 403/i);
+    assert.equal(calls, 1);
+});
+
+test('distinguishes a Gemini connection failure from an image failure', async () => {
+    const { context, send } = setup();
+    context.fetch = async () => { throw new TypeError('network error'); };
+    const result = await send({ type: 'gemini-solve', question: 'Question', images: [] });
+    assert.match(result.error, /connect to Gemini/i);
+});
